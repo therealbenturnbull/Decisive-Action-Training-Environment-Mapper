@@ -6,60 +6,55 @@
 
 ![DATE Mapper map overview](images/map.png)
 
-**Quick overview:** _Add a short overview of what is being shown._
+The main map view. 
 
 ### Cities
 
 ![Cities displayed in the map view](images/map_cities.png)
 
-**Quick overview:** _Add a short overview of what is being shown._
+Maps have details that can be toggled, including capital cities. 
 
-### Undersea Cables
-
-![Undersea cables displayed in the map view](images/map_cables.png)
-
-**Quick overview:** _Add a short overview of what is being shown._
-
-### Wind Farms
-
-![Wind farms displayed in the map view](images/map_windfarms.png)
-
-**Quick overview:** _Add a short overview of what is being shown._
 
 ### Critical Infrastructure
 
 ![Critical infrastructure displayed in the map view](images/map_infeastructure.png)
 
-**Quick overview:** _Add a short overview of what is being shown._
+Multiple types of critical infrastucture can be added. 
 
-### Infrastructure Detail
+#### Undersea Cables
+
+![Undersea cables displayed in the map view](images/map_cables.png)
+
+Other details include infrastructure such as undersea cables. 
+
+#### Wind Farms
+
+![Wind farms displayed in the map view](images/map_windfarms.png)
+
+Wind farms and other infrastructure is also viewable. 
+
+#### Infrastructure Detail
 
 ![Detailed infrastructure displayed in the map view](images/map_infrastructure_detail.png)
 
-**Quick overview:** _Add a short overview of what is being shown._
+Points have details-on-demand.
+
 
 ## Globe Views
+
 
 ### Globe Overview
 
 ![DATE Mapper globe overview](images/globe.png)
 
-**Quick overview:** _Add a short overview of what is being shown._
-
-### Cities
+The globe is an alternate perspective. 
 
 ![Cities displayed in the globe view](images/globe_cities.png)
-
-**Quick overview:** _Add a short overview of what is being shown._
 
 ### Globe Detail
 
 ![Detailed DATE Mapper globe view](images/globe_detail.png)
 
-**Quick overview:** _Add a short overview of what is being shown._
-
-### 80s Colour Scheme
-
 ![DATE Mapper globe with the 80s colour scheme](images/globe-80s.png)
 
-**Quick overview:** _Add a short overview of what is being shown._
+Multiple colour schemes (some more practical than others).

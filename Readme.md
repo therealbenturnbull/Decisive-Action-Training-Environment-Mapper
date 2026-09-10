@@ -6,6 +6,9 @@ DATE Mapper is an independent map and globe viewer for the fictional operating
 environments used by the [U.S. Army Decisive Action Training Environment (DATE)](https://odin.t2com.army.mil/DATE)
 and [Australian Army DATE](https://date.army.gov.au/).
 
+This system has been designed to work on a monitor or a touch screen system. 
+
+Images are here: 
 [View the DATE Mapper gallery](gallery.md).
 
 ## Local development
