@@ -1,0 +1,23 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "2",
+      "type": "Feature",
+      "properties": {
+        "name": "Baku",
+        "country": "Atropia",
+        "status": "NOTIONAL",
+        "region": "Eurasia",
+        "version": "GIS version 1.5; May 2024"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.86027130325782,
+          40.39721789134318
+        ]
+      }
+    }
+  ]
+}

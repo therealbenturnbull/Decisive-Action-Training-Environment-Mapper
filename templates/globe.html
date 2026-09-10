@@ -1,0 +1,158 @@
+<!doctype html>
+<!-- Aim: Provide the interactive globe view and its navigation and layer controls. -->
+<!-- Author: Benjamin Turnbull -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>DATE Globe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/static/globe.css" />
+    <link rel="stylesheet" href="/static/app-shell.css" />
+  </head>
+
+  <body class="app-layout globe-page">
+    <header class="app-header">
+      <div class="app-header-inner">
+        <a class="app-identity" href="/" aria-label="DATE Mapper map viewer">
+          <span class="app-mark" aria-hidden="true">DATE</span>
+          <span class="app-identity-copy">
+            <span class="app-product">DATE Mapper</span>
+            <h1>Globe Viewer</h1>
+          </span>
+        </a>
+
+        <nav class="view-switch" aria-label="View mode">
+          <a href="/">Map</a>
+          <a href="/globe" aria-current="page">Globe</a>
+        </nav>
+
+        <div class="app-header-actions">
+          <button id="pauseButton" class="header-action" type="button">Pause</button>
+          <a class="header-action" href="/settings">Settings</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="globe-shell">
+      <section class="globe-stage" aria-label="Interactive country globe">
+        <div class="globe-zoom-controls" role="group" aria-label="Globe zoom">
+          <button id="zoomInButton" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+          <button id="zoomOutButton" type="button" aria-label="Zoom out" title="Zoom out">−</button>
+        </div>
+        <canvas
+          id="globeCanvas"
+          tabindex="0"
+          aria-label="Interactive country globe. Drag to rotate; scroll, pinch, or use the zoom buttons to zoom."
+        ></canvas>
+        <div class="globe-vignette" aria-hidden="true"></div>
+      </section>
+
+      <aside class="globe-controls" aria-label="Globe tools">
+        <div class="globe-controls-heading">
+          <div>
+            <span class="panel-kicker">Globe tools</span>
+            <h2>Layers and highlights</h2>
+          </div>
+          <span id="countryCount" class="country-count" aria-live="polite">Loading countries…</span>
+        </div>
+
+        <div class="highlight-panel">
+          <details class="highlight-section" aria-label="Country highlights">
+            <summary class="highlight-section-header">
+              <h2>Countries</h2>
+              <span class="highlight-section-actions">
+                <button id="clearCountriesButton" type="button">Clear</button>
+                <span class="section-toggle-hint">Open</span>
+              </span>
+            </summary>
+            <div class="highlight-section-body">
+              <input
+                id="countrySearch"
+                type="search"
+                placeholder="Filter countries…"
+                aria-label="Filter countries"
+              />
+              <div id="countryList" class="highlight-list">
+                <span class="highlight-empty">Loading countries…</span>
+              </div>
+            </div>
+          </details>
+
+          <details class="highlight-section" aria-label="Capital city highlights">
+            <summary class="highlight-section-header">
+              <h2>Capital Cities</h2>
+              <span class="highlight-section-actions">
+                <button id="clearCapitalsButton" type="button">Clear</button>
+                <span class="section-toggle-hint">Open</span>
+              </span>
+            </summary>
+            <div class="highlight-section-body">
+              <input
+                id="capitalSearch"
+                type="search"
+                placeholder="Filter capitals…"
+                aria-label="Filter capital cities"
+              />
+              <div id="capitalList" class="highlight-list">
+                <span class="highlight-empty">Loading capitals…</span>
+              </div>
+            </div>
+          </details>
+
+          <details class="highlight-section" aria-label="DATE capital city highlights">
+            <summary class="highlight-section-header">
+              <h2>DATE Capital Cities</h2>
+              <span class="highlight-section-actions">
+                <button id="clearDateCapitalsButton" type="button">Clear</button>
+                <span class="section-toggle-hint">Open</span>
+              </span>
+            </summary>
+            <div class="highlight-section-body">
+              <input
+                id="dateCapitalSearch"
+                type="search"
+                placeholder="Filter DATE capitals…"
+                aria-label="Filter DATE capital cities"
+              />
+              <div id="dateCapitalList" class="highlight-list">
+                <span class="highlight-empty">Loading DATE capitals…</span>
+              </div>
+            </div>
+          </details>
+
+          <section class="highlight-section" aria-label="Undersea cable overlay">
+            <div class="highlight-section-header">
+              <h2>Undersea Cables</h2>
+              <span id="underseaCableCount" class="marker-count">Optional</span>
+            </div>
+            <label class="marker-toggle">
+              <input id="showUnderseaCablesToggle" type="checkbox" />
+              <span>
+                <span class="highlight-name">Undersea Internet Cables</span>
+                <span class="highlight-detail">High-resolution route layer</span>
+              </span>
+            </label>
+          </section>
+
+          <section class="highlight-section" aria-label="User marker highlights">
+            <div class="highlight-section-header">
+              <h2>User Markers</h2>
+              <span id="userMarkerCount" class="marker-count">Loading…</span>
+            </div>
+            <label class="marker-toggle">
+              <input id="showUserMarkersToggle" type="checkbox" />
+              <span>
+                <span class="highlight-name">Show main map markers</span>
+                <span class="highlight-detail">Includes custom marker PNGs when supplied</span>
+              </span>
+            </label>
+          </section>
+        </div>
+      </aside>
+    </main>
+
+    <script src="/static/settings-store.js"></script>
+    <script src="/static/colour-schemes.js"></script>
+    <script src="/static/globe.js"></script>
+  </body>
+</html>

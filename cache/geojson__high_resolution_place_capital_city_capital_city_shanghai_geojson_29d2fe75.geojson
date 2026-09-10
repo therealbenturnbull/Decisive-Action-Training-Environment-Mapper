@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"id": "3", "type": "Feature", "properties": {"name": "Shanghai", "country": "Olvana", "status": "NOTIONAL", "region": "Indo-Pacfic", "version": "GIS version 1.4; November 2021"}, "geometry": {"type": "Point", "coordinates": [121.43455881982014, 31.21839831122821]}}]}

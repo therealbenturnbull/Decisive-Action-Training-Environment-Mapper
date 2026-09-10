@@ -1,0 +1,23 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "5",
+      "type": "Feature",
+      "properties": {
+        "name": "Moscow",
+        "country": "Donovia",
+        "status": "NOTIONAL",
+        "region": "Eurasia",
+        "version": "GIS version 1.5; May 2024"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.6135769672714,
+          55.75410998124818
+        ]
+      }
+    }
+  ]
+}

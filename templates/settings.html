@@ -1,0 +1,60 @@
+<!doctype html>
+<!-- Aim: Present shared DATE Mapper preferences for both map views. -->
+<!-- Author: Benjamin Turnbull -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>DATE Mapper Settings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+
+  <body class="settings-page">
+    <header>
+      <div class="top">
+        <div>
+          <h1>Settings</h1>
+          <div class="help">Common DATE Mapper preferences</div>
+        </div>
+        <nav class="top-actions" aria-label="Settings navigation">
+          <a class="settings-link" href="/">Map viewer</a>
+          <a class="globe-link" href="/globe">Open globe</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="settings-shell">
+      <section class="settings-section" aria-labelledby="colourSettingsHeading">
+        <div class="settings-section-heading">
+          <p class="settings-kicker">Map and Globe</p>
+          <h2 id="colourSettingsHeading">Colour scheme</h2>
+        </div>
+
+        <fieldset id="colourSchemeOptions" class="colour-scheme-options">
+          <legend>Choose a colour scheme for both map views</legend>
+        </fieldset>
+      </section>
+
+      <section class="settings-section" aria-labelledby="mapSettingsHeading">
+        <div class="settings-section-heading">
+          <p class="settings-kicker">Map Viewer</p>
+          <h2 id="mapSettingsHeading">Map display</h2>
+        </div>
+
+        <label class="setting-row" for="flipAntarcticaSetting">
+          <span>
+            <span class="setting-name">Vertically flip Antarctica</span>
+            <span class="setting-description">Reflect Antarctica within its existing north/south bounds.</span>
+          </span>
+          <input id="flipAntarcticaSetting" type="checkbox" />
+        </label>
+      </section>
+
+      <p id="settingsStatus" class="settings-status" aria-live="polite"></p>
+    </main>
+
+    <script src="/static/settings-store.js"></script>
+    <script src="/static/colour-schemes.js"></script>
+    <script src="/static/settings.js"></script>
+  </body>
+</html>

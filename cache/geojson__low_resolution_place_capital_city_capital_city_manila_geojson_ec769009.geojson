@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"id": "2", "type": "Feature", "properties": {"name": "Manila", "country": "South Torbia", "status": "NOTIONAL", "region": "Indo-Pacfic", "version": "GIS version 1.4; November 2021"}, "geometry": {"type": "Point", "coordinates": [120.9802713035424, 14.606104813440414]}}]}

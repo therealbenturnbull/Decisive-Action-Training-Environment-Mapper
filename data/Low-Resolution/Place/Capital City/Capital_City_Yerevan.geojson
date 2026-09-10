@@ -1,0 +1,23 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "1",
+      "type": "Feature",
+      "properties": {
+        "name": "Yerevan",
+        "country": "Limaria",
+        "status": "NOTIONAL",
+        "region": "Eurasia",
+        "version": "GIS version 1.5; May 2024"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          44.51160553175214,
+          40.18309659414214
+        ]
+      }
+    }
+  ]
+}

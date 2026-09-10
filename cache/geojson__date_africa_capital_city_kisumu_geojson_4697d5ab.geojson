@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {"id": "1", "name": "Kisumu", "country": "Amari", "status": "NOTIONAL", "region": "Africa", "version": "GIS version 1.4; November 2021"}, "geometry": {"type": "Point", "coordinates": [34.75001297886769, -0.09003456736699889]}}]}

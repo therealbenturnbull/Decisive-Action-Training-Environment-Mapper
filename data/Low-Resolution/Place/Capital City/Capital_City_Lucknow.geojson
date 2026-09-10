@@ -1,0 +1,23 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "5",
+      "type": "Feature",
+      "properties": {
+        "name": "Lucknow",
+        "country": "Himaldesh",
+        "status": "NOTIONAL",
+        "region": "Indo-Pacfic",
+        "version": "GIS version 1.4; November 2021"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.91305287890293,
+          26.85698494044243
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "0",
+      "type": "Feature",
+      "properties": {
+        "name": "Tbilisi",
+        "country": "Georgia",
+        "status": "NOTIONAL",
+        "region": "Eurasia",
+        "version": "GIS version 1.5; May 2024"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          44.78884959099795,
+          41.72695584707746
+        ]
+      }
+    }
+  ]
+}

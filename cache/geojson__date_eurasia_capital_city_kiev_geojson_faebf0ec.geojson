@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {"id": "3", "name": "Kiev", "country": "Pirtuni", "status": "NOTIONAL", "region": "Eurasia", "version": "GIS version 1.5; May 2024"}, "geometry": {"type": "Point", "coordinates": [30.514682110472087, 50.43531318760692]}}]}

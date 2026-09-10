@@ -1,0 +1,131 @@
+<!doctype html>
+<!-- Aim: Provide the flat DATE map viewer and its layer and marker controls. -->
+<!-- Author: Benjamin Turnbull -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>DATE Map Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css" />
+    <script src="/static/vendor/leaflet/leaflet.js"></script>
+
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="stylesheet" href="/static/app-shell.css" />
+  </head>
+
+  <body class="app-layout map-page">
+    <svg class="theme-svg-definitions" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="mirrorwave-world-metal" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f1ffff" />
+          <stop offset="12%" stop-color="#9fe8ed" />
+          <stop offset="29%" stop-color="#365a65" />
+          <stop offset="40%" stop-color="#e9ffff" />
+          <stop offset="49%" stop-color="#78aeb7" />
+          <stop offset="69%" stop-color="#29444f" />
+          <stop offset="83%" stop-color="#9bc2c9" />
+          <stop offset="100%" stop-color="#14242c" />
+        </linearGradient>
+        <linearGradient id="mirrorwave-date-metal" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#fff8fd" />
+          <stop offset="12%" stop-color="#ffc2e0" />
+          <stop offset="29%" stop-color="#733150" />
+          <stop offset="40%" stop-color="#fff1f8" />
+          <stop offset="50%" stop-color="#ef79b4" />
+          <stop offset="69%" stop-color="#692445" />
+          <stop offset="84%" stop-color="#d65d9c" />
+          <stop offset="100%" stop-color="#270e21" />
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <header class="app-header">
+      <div class="app-header-inner">
+        <a class="app-identity" href="/" aria-label="DATE Mapper map viewer">
+          <span class="app-mark" aria-hidden="true">DATE</span>
+          <span class="app-identity-copy">
+            <span class="app-product">DATE Mapper</span>
+            <h1>Map Viewer</h1>
+          </span>
+        </a>
+
+        <nav class="view-switch" aria-label="View mode">
+          <a href="/" aria-current="page">Map</a>
+          <a href="/globe">Globe</a>
+        </nav>
+
+        <div class="app-header-actions">
+          <button id="reloadBtn" class="header-action" type="button">Reload</button>
+          <a class="header-action" href="/settings">Settings</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="map-tools" aria-label="Map tools">
+      <details id="markerTools" class="marker-tools">
+        <summary class="marker-tools-summary">
+          <span class="marker-tools-title">Marker tools</span>
+          <span id="status" class="map-status" aria-live="polite"></span>
+          <span class="marker-tools-state" aria-hidden="true"></span>
+        </summary>
+
+        <div class="marker-tools-body">
+          <form id="markerForm" class="marker-form">
+            <label>
+              <span>Marker name</span>
+              <input id="markerName" name="name" type="text" placeholder="Optional" />
+            </label>
+
+            <label>
+              <span>Description</span>
+              <input id="markerDescription" name="description" type="text" placeholder="Optional notes" />
+            </label>
+
+            <label>
+              <span>Latitude</span>
+              <input id="markerLat" name="lat" type="number" step="any" required />
+            </label>
+
+            <label>
+              <span>Longitude</span>
+              <input id="markerLng" name="lng" type="number" step="any" required />
+            </label>
+
+            <label class="marker-file-field">
+              <span>Marker PNG</span>
+              <input id="markerIcon" name="icon" type="file" accept="image/png,.png" />
+            </label>
+
+            <div class="marker-actions">
+              <button id="pickMarkerBtn" type="button">Pick location</button>
+              <button class="marker-primary-action" type="submit">Add marker</button>
+              <button id="clearMarkerBtn" type="button">Clear</button>
+            </div>
+          </form>
+        </div>
+      </details>
+    </section>
+
+    <main class="map-shell">
+      <div id="map"></div>
+      <aside id="layerPanel" class="layer-panel" hidden>
+        <div class="layer-panel-header">
+          <div>
+            <h2>Layers</h2>
+            <p>Toggle categories, sub-categories, or individual files.</p>
+          </div>
+          <div class="layer-panel-actions">
+            <button id="collapseLayerGroupsBtn" type="button">Collapse all</button>
+            <button id="expandLayerGroupsBtn" type="button">Expand all</button>
+          </div>
+        </div>
+        <div id="layerPanelList" class="layer-panel-list"></div>
+      </aside>
+    </main>
+
+    <script src="/static/settings-store.js"></script>
+    <script src="/static/colour-schemes.js"></script>
+    <script src="/static/main.js"></script>
+  </body>
+</html>

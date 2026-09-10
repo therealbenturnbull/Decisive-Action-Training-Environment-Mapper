@@ -1,0 +1,23 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "6",
+      "type": "Feature",
+      "properties": {
+        "name": "Mandalay",
+        "country": "Bagansait",
+        "status": "NOTIONAL",
+        "region": "Indo-Pacfic",
+        "version": "GIS version 1.4; November 2021"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          96.08308298964084,
+          21.971934281243307
+        ]
+      }
+    }
+  ]
+}

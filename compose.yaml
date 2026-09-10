@@ -1,0 +1,26 @@
+# Aim: Build and run the local DATE Mapper container with its required data mounts.
+# Author: Benjamin Turnbull
+
+services:
+  date-mapper:
+    build:
+      context: .
+    image: date-mapper:local
+    ports:
+      - "9099:9099"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 9099
+      GUNICORN_WORKERS: 1
+      GUNICORN_THREADS: 4
+      GUNICORN_TIMEOUT: 120
+    volumes:
+      - date-mapper-cache:/app/cache
+      - date-mapper-storage:/app/storage
+    restart: unless-stopped
+
+volumes:
+  date-mapper-cache:
+    name: date-mapper-cache
+  date-mapper-storage:
+    name: date-mapper-storage

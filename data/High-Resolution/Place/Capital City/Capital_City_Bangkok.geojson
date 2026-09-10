@@ -1,0 +1,23 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "7",
+      "type": "Feature",
+      "properties": {
+        "name": "Bangkok",
+        "country": "Khorathidin",
+        "status": "NOTIONAL",
+        "region": "Indo-Pacfic",
+        "version": "GIS version 1.4; November 2021"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          100.51469879369489,
+          13.751945064087977
+        ]
+      }
+    }
+  ]
+}

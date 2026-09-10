@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {"name": "Kismaayo", "country": "Nyumba", "status": "NOTIONAL", "region": "Africa", "version": "GIS version 1.4; November 2021"}, "geometry": {"type": "Point", "coordinates": [42.51832433957582, -0.3566332815604056]}}]}

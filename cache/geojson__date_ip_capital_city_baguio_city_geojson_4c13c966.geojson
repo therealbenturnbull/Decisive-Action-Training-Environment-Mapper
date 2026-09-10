@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {"id": "0", "name": "Baguio City", "country": "North Torbia", "status": "NOTIONAL", "region": "Indo-Pacfic", "version": "GIS version 1.4; November 2021"}, "geometry": {"type": "Point", "coordinates": [120.56994258533086, 16.429990660563938]}}]}

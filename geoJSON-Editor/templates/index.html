@@ -1,0 +1,111 @@
+<!doctype html>
+<!-- Aim: Provide the standalone browser interface for editing GeoJSON point files. -->
+<!-- Author: Benjamin Turnbull -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GeoJSON Point Editor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/leaflet/leaflet.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>GeoJSON Point Editor</h1>
+      <p>Load one editable GeoJSON, compare against read-only overlays, then save a new object.</p>
+    </div>
+    <div class="port-pill">Flask port {{ port }}</div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel">
+      <section class="card">
+        <h2>Files</h2>
+        <label class="file-picker">
+          <span>Editable GeoJSON</span>
+          <input id="editableFile" type="file" accept=".geojson,.json,application/geo+json,application/json">
+        </label>
+        <label class="file-picker">
+          <span>Read-Only Comparison GeoJSONs</span>
+          <input id="comparisonFiles" type="file" accept=".geojson,.json,application/geo+json,application/json" multiple>
+        </label>
+        <label class="file-picker">
+          <span>Built-In Read-Only Countries</span>
+          <select id="countrySelect" multiple size="8" disabled></select>
+        </label>
+        <div class="button-row">
+          <button id="downloadButton" type="button" disabled>Download Edited GeoJSON</button>
+          <button id="clearComparisonsButton" type="button" disabled>Clear Comparisons</button>
+          <button id="addCountriesButton" type="button" disabled>Add Selected Countries</button>
+        </div>
+        <p id="countryStatus" class="muted">Loading country list…</p>
+        <p id="fileStatus" class="muted">No editable GeoJSON loaded yet.</p>
+        <p id="basemapStatus" class="muted">Loading local vector basemap…</p>
+      </section>
+
+      <section class="card">
+        <h2>Selection</h2>
+        <div class="button-grid">
+          <button id="selectAllButton" type="button" disabled>Select All Vertices</button>
+          <button id="clearSelectionButton" type="button" disabled>Clear Selection</button>
+          <button id="startBoxSelectButton" type="button" disabled>Box Select</button>
+          <button id="fitEditableButton" type="button" disabled>Fit Editable</button>
+          <button id="deleteSelectedButton" type="button" disabled>Delete Selected</button>
+        </div>
+        <p id="selectionStatus" class="muted">No vertices selected.</p>
+        <p id="vertexRenderStatus" class="muted">Load a GeoJSON to show editable vertex handles.</p>
+      </section>
+
+      <section class="card">
+        <h2>Move Selected</h2>
+        <div class="nudge-grid">
+          <span></span>
+          <button data-nudge="north" type="button" disabled>↑</button>
+          <span></span>
+          <button data-nudge="west" type="button" disabled>←</button>
+          <input id="nudgeDistance" type="number" value="0.0001" step="0.0001" min="0" aria-label="Nudge distance in degrees">
+          <button data-nudge="east" type="button" disabled>→</button>
+          <span></span>
+          <button data-nudge="south" type="button" disabled>↓</button>
+          <span></span>
+        </div>
+        <p class="muted">Nudge distance is in decimal degrees.</p>
+      </section>
+
+      <section class="card">
+        <h2>Selected Vertex</h2>
+        <div id="singleEditor" class="single-editor disabled">
+          <label>
+            Latitude
+            <input id="latitudeInput" type="number" step="any" disabled>
+          </label>
+          <label>
+            Longitude
+            <input id="longitudeInput" type="number" step="any" disabled>
+          </label>
+          <label>
+            Properties JSON
+            <textarea id="propertiesInput" rows="7" disabled></textarea>
+          </label>
+          <button id="applySingleButton" type="button" disabled>Apply Vertex Changes</button>
+        </div>
+        <p id="singleEditorStatus" class="muted">Select exactly one vertex to edit coordinates and feature properties.</p>
+      </section>
+
+      <section class="card">
+        <h2>Layers</h2>
+        <ul id="layerList" class="layer-list"></ul>
+      </section>
+    </aside>
+
+    <section class="map-wrap">
+      <div id="map"></div>
+      <div id="boxSelectHint" class="box-hint hidden">Drag a rectangle to select points.</div>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='vendor/leaflet/leaflet.js') }}"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+/* Aim: Provide the shared header and navigation styling used across DATE Mapper views. */
+/* Author: Benjamin Turnbull */
+
+:root {
+  --app-header-surface: var(--panel, rgba(255, 255, 255, 0.96));
+  --app-header-border: var(--control-border, var(--line, rgba(31, 41, 51, 0.18)));
+  --app-header-text: var(--text, var(--fg, #1f2933));
+  --app-header-muted: var(--muted, #536471);
+  --app-header-primary: var(--primary-bg, var(--accent-ui, #22577a));
+  --app-header-primary-text: var(--primary-text, var(--bg, #ffffff));
+  --app-header-control: var(--control-bg, var(--panel, rgba(255, 255, 255, 0.72)));
+  --app-header-hover: var(--control-hover, var(--panel-hover, rgba(34, 87, 122, 0.08)));
+  --app-focus: var(--accent, var(--accent-ui, #22577a));
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 1200;
+  flex: 0 0 auto;
+  padding: 0;
+  border-bottom: 1px solid var(--app-header-border);
+  background: var(--app-header-surface);
+  color: var(--app-header-text);
+  box-shadow: 0 8px 24px rgba(31, 41, 51, 0.08);
+  backdrop-filter: blur(16px);
+}
+
+.app-header-inner {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr);
+  gap: 16px;
+  align-items: center;
+  width: 100%;
+  min-height: 72px;
+  padding: 10px 16px;
+}
+
+.app-identity {
+  display: inline-flex;
+  gap: 11px;
+  align-items: center;
+  width: fit-content;
+  min-width: 0;
+  min-height: 48px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-mark {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: var(--app-header-primary);
+  color: var(--app-header-primary-text);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+.app-identity-copy {
+  min-width: 0;
+}
+
+.app-product,
+.app-header h1 {
+  display: block;
+  margin: 0;
+  overflow: hidden;
+  letter-spacing: 0;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.app-product {
+  color: var(--app-header-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.app-header h1 {
+  max-width: none;
+  margin-top: 2px;
+  color: var(--app-header-text);
+  font-size: 1.06rem;
+  font-weight: 780;
+}
+
+.view-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(92px, 1fr));
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--app-header-border);
+  border-radius: 8px;
+  background: var(--app-header-control);
+}
+
+.view-switch a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 5px;
+  color: var(--app-header-muted);
+  font-size: 0.9rem;
+  font-weight: 720;
+  text-decoration: none;
+  touch-action: manipulation;
+}
+
+.view-switch a:hover {
+  background: var(--app-header-hover);
+  color: var(--app-header-text);
+}
+
+.view-switch a[aria-current="page"] {
+  background: var(--app-header-primary);
+  color: var(--app-header-primary-text);
+  box-shadow: 0 2px 8px rgba(31, 41, 51, 0.14);
+}
+
+.app-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.app-header .header-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid var(--app-header-border);
+  border-radius: 8px;
+  background: var(--app-header-control);
+  color: var(--app-header-text);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+  backdrop-filter: none;
+}
+
+.app-header .header-action:hover {
+  border-color: var(--app-focus);
+  background: var(--app-header-hover);
+}
+
+body[data-colour-scheme="mirrorwave"] .app-header {
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.26),
+    inset 0 -1px rgba(0, 0, 0, 0.5),
+    0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+body[data-colour-scheme="mirrorwave"] :is(.app-mark, .view-switch a[aria-current="page"]) {
+  border: 1px solid rgba(238, 255, 255, 0.6);
+  background:
+    linear-gradient(
+      132deg,
+      #f6ffff 0%,
+      #8eb5bf 21%,
+      #334954 38%,
+      #e9ffff 50%,
+      #648792 67%,
+      #ff8dc5 100%
+    );
+  color: #071016;
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.82),
+    inset 0 -1px rgba(5, 7, 12, 0.5),
+    0 3px 12px rgba(100, 229, 240, 0.2);
+}
+
+body[data-colour-scheme="mirrorwave"] :is(.view-switch, .header-action) {
+  background-image: linear-gradient(
+    128deg,
+    rgba(255, 255, 255, 0.17),
+    rgba(62, 82, 91, 0.06) 38%,
+    rgba(223, 253, 255, 0.16) 52%,
+    rgba(255, 92, 171, 0.09)
+  );
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.app-header :is(a, button):focus-visible,
+.map-tools :is(summary, button, input):focus-visible,
+.globe-controls :is(summary, button, input):focus-visible,
+.globe-zoom-controls button:focus-visible,
+#globeCanvas:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--app-focus) 48%, transparent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .app-header-inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 12px;
+    min-height: 0;
+    padding: 8px 12px;
+  }
+
+  .app-identity {
+    min-height: 44px;
+  }
+
+  .app-mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .view-switch {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+  }
+
+  .view-switch a {
+    min-height: 44px;
+  }
+
+  .app-header .header-action {
+    min-height: 44px;
+    padding-inline: 11px;
+  }
+}
+
+@media (max-width: 410px) {
+  .app-product {
+    display: none;
+  }
+
+  .app-header h1 {
+    margin-top: 0;
+    font-size: 0.96rem;
+  }
+
+  .app-header-actions {
+    gap: 6px;
+  }
+
+  .app-header .header-action {
+    padding-inline: 9px;
+    font-size: 0.82rem;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .app-header-inner {
+    min-height: 76px;
+  }
+
+  .app-header .header-action,
+  .view-switch a {
+    min-height: 48px;
+  }
+
+  .app-header .header-action:active,
+  .view-switch a:active {
+    background: var(--app-header-hover);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-header *,
+  .map-tools *,
+  .globe-controls * {
+    scroll-behavior: auto;
+    transition: none !important;
+  }
+}

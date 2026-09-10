@@ -1,0 +1,23 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "8",
+      "type": "Feature",
+      "properties": {
+        "name": "Da Nang",
+        "country": "Sungzon",
+        "status": "NOTIONAL",
+        "region": "Indo-Pacfic",
+        "version": "GIS version 1.4; November 2021"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          108.24997106835434,
+          16.0600390817865
+        ]
+      }
+    }
+  ]
+}

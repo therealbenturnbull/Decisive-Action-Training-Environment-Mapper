@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {"id": "3", "name": "Dar es Salaam", "country": "Kujenga", "status": "NOTIONAL", "region": "Africa", "version": "GIS version 1.4; November 2021"}, "geometry": {"type": "Point", "coordinates": [39.26639597769457, -6.7980667361243965]}}]}

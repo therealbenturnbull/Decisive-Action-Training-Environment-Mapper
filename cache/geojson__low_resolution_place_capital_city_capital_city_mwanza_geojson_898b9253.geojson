@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"id": "2", "type": "Feature", "properties": {"name": "Mwanza", "country": "Ziwa", "status": "NOTIONAL", "region": "Africa", "version": "GIS version 1.4; November 2021"}, "geometry": {"type": "Point", "coordinates": [32.93002070998011, -2.520015443027539]}}]}

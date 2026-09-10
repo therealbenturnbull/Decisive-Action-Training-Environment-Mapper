@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"id": "4", "type": "Feature", "properties": {"name": "Coron", "country": "Gabal", "status": "NOTIONAL", "region": "Indo-Pacfic", "version": "GIS version 1.4; November 2021"}, "geometry": {"type": "Point", "coordinates": [120.20256572171482, 11.9975663690456]}}]}

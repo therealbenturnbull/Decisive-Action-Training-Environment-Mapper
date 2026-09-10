@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {"id": "4", "name": "Tehran", "country": "Ariana", "status": "NOTIONAL", "region": "Eurasia", "version": "GIS version 1.5; May 2024"}, "geometry": {"type": "Point", "coordinates": [51.42239817500899, 35.673888627001304]}}]}
