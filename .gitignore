@@ -180,3 +180,7 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 .DS_Store
+
+# Local handoff context must not be published.
+HANDOFF_CONTEXT.json
+HANDOFF_PROMPTS.md
