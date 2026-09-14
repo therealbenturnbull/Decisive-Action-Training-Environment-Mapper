@@ -1,6 +1,6 @@
 # DATE Mapper
 
-![DATE Mapper globe view](images/globe.png)
+![DATE Mapper Modern globe with DATE countries highlighted](images/globe-spin-highlighted-modern.gif)
 
 DATE Mapper is an independent map and globe viewer for the fictional operating
 environments used by the [U.S. Army Decisive Action Training Environment (DATE)](https://odin.t2com.army.mil/DATE)
@@ -190,5 +190,4 @@ python -m unittest discover -s tests -v
 ## AI Use
 
 OpenAI Codex has been used to assist in the creation of this project. Ideas, planning and structure are mine, but I've used it to assist in HTML and web elements I was not familiar with. All the maps, sources and research was developed by me. It also helped fix a rendering bug in the globe. 
-
 

@@ -58,3 +58,83 @@ The globe is an alternate perspective.
 ![DATE Mapper globe with the 80s colour scheme](images/globe-80s.png)
 
 Multiple colour schemes (some more practical than others).
+
+### Colour Schemes
+
+#### Basic
+
+![Highlighted DATE countries using the Basic colour scheme](images/globe-spin-highlighted-basic.gif)
+
+The original flat-map-inspired palette with highlighted DATE countries.
+
+#### Neon Night
+
+![Highlighted DATE countries using the Neon Night colour scheme](images/globe-spin-highlighted-neon-night.gif)
+
+A dark, high-contrast globe with vivid modern colours.
+
+#### Mirrorwave
+
+![Highlighted DATE countries using the Mirrorwave colour scheme](images/globe-spin-highlighted-mirrorwave.gif)
+
+A reflective metallic treatment with illuminated DATE countries.
+
+#### Wireframe
+
+![Highlighted DATE countries using the Wireframe colour scheme](images/globe-spin-highlighted-wireframe.gif)
+
+Country outlines rendered over a dark globe surface.
+
+#### White Fill
+
+![Highlighted DATE countries using the White Fill colour scheme](images/globe-spin-highlighted-white-fill.gif)
+
+A monochrome white land treatment with contrasting DATE highlights.
+
+#### Inverted
+
+![Highlighted DATE countries using the Inverted colour scheme](images/globe-spin-highlighted-inverted.gif)
+
+A light-background interpretation with restrained country outlines.
+
+#### Natural
+
+![Highlighted DATE countries using the Natural colour scheme](images/globe-spin-highlighted-natural.gif)
+
+An earth-inspired land and ocean palette.
+
+#### Nordic
+
+![Highlighted DATE countries using the Nordic colour scheme](images/globe-spin-highlighted-nordic.gif)
+
+A cool, minimal palette with warm DATE highlights.
+
+#### Pacific
+
+![Highlighted DATE countries using the Pacific colour scheme](images/globe-spin-highlighted-pacific.gif)
+
+Deep ocean colours paired with fresh coastal greens.
+
+#### Graphite
+
+![Highlighted DATE countries using the Graphite colour scheme](images/globe-spin-highlighted-graphite.gif)
+
+A dark neutral globe with crisp, warm highlights.
+
+#### Solar
+
+![Highlighted DATE countries using the Solar colour scheme](images/globe-spin-highlighted-solar.gif)
+
+A bright gold-on-navy scheme with strong contrast.
+
+#### Aurora
+
+![Highlighted DATE countries using the Aurora colour scheme](images/globe-spin-highlighted-aurora.gif)
+
+A luminous cyan and yellow palette on a dark background.
+
+#### Transit
+
+![Highlighted DATE countries using the Transit colour scheme](images/globe-spin-highlighted-transit.gif)
+
+A graphic black, white, and orange interpretation.
