@@ -14,6 +14,13 @@ const CATEGORY_ORDER = ["Country", "Place", "Infrastructure", "User-Defined"];
 const activeLayers = new Map();
 const layerRows = new Map();
 const layerLoadPromises = new Map();
+const layerLoadControllers = new Map();
+const MAX_CONCURRENT_LAYER_LOADS = 4;
+let catalogLoadController = null;
+let catalogRequestGeneration = 0;
+let catalogGeneration = 0;
+let visibilityActionGeneration = 0;
+let hasLoadedCatalog = false;
 let activeColourScheme = window.DateMapperColourSchemes.get(
   window.DateMapperSettings.get().colourScheme
 );
@@ -117,7 +124,7 @@ function initMap() {
 
 }
 
-function featurePopupHtml(props) {
+function featurePopupContent(props) {
   const keys = Object.keys(props || {})
     .filter((key) => !(
       key.toLowerCase() === "capital_type"
@@ -125,7 +132,15 @@ function featurePopupHtml(props) {
     ))
     .slice(0, 15);
   if (!keys.length) return null;
-  return keys.map((k) => `<div><b>${k}:</b> ${String(props[k])}</div>`).join("");
+  const content = document.createElement("div");
+  for (const key of keys) {
+    const row = document.createElement("div");
+    const label = document.createElement("b");
+    label.textContent = `${key}:`;
+    row.append(label, document.createTextNode(` ${String(props[key])}`));
+    content.append(row);
+  }
+  return content;
 }
 
 function prettifyHoverLabel(value) {
@@ -164,6 +179,12 @@ function featureHoverLabel(feature, title) {
 
   const found = candidates.find((value) => String(value || "").trim());
   return prettifyHoverLabel(found || titleToCountryLabel(title) || "Country");
+}
+
+function featureTooltipContent(feature, title) {
+  const content = document.createElement("span");
+  content.textContent = featureHoverLabel(feature, title);
+  return content;
 }
 
 function isCoordinatePosition(value) {
@@ -579,12 +600,12 @@ function makeGeoJsonLayer(layerId, title, geojson, item) {
       });
     },
     onEachFeature: (feature, layer) => {
-      const html = featurePopupHtml(feature.properties || {});
-      if (html) layer.bindPopup(html);
+      const content = featurePopupContent(feature.properties || {});
+      if (content) layer.bindPopup(content);
 
       const geometryType = feature?.geometry?.type || "";
       if (geometryType.includes("Polygon") || geometryType.includes("LineString")) {
-        layer.bindTooltip(featureHoverLabel(feature, title), {
+        layer.bindTooltip(featureTooltipContent(feature, title), {
           className: "country-hover-tooltip",
           sticky: true,
           direction: "top",
@@ -645,8 +666,8 @@ function syncDraftMarkerFromInputs() {
   updateDraftMarker(coords.lat, coords.lng);
 }
 
-async function fetchLayer(layerId) {
-  const res = await fetch(`/api/layer/${encodeURIComponent(layerId)}`);
+async function fetchLayer(layerId, signal) {
+  const res = await fetch(`/api/layer/${encodeURIComponent(layerId)}`, { signal });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to load layer");
   return data;
@@ -701,6 +722,20 @@ function updateGroupCounts() {
   });
 }
 
+function cancelLayerLoad(layerId) {
+  layerLoadControllers.get(layerId)?.abort();
+  layerLoadControllers.delete(layerId);
+  layerLoadPromises.delete(layerId);
+  const row = layerRows.get(layerId);
+  if (row && !row.missing) setRowState(layerId, "idle");
+}
+
+function cancelLayerLoads() {
+  for (const layerId of layerLoadControllers.keys()) {
+    cancelLayerLoad(layerId);
+  }
+}
+
 async function setLayerVisibility(layerId, visible) {
   const row = layerRows.get(layerId);
   if (!row || row.missing) return;
@@ -709,6 +744,7 @@ async function setLayerVisibility(layerId, visible) {
   updateGroupCounts();
 
   if (!visible) {
+    cancelLayerLoad(layerId);
     const layer = activeLayers.get(layerId);
     if (layer && map.hasLayer(layer)) {
       map.removeLayer(layer);
@@ -727,21 +763,31 @@ async function setLayerVisibility(layerId, visible) {
       refreshMapLayerStyles();
     }
     setRowState(layerId, "idle");
-    return;
+    return existingLayer;
   }
 
   if (layerLoadPromises.has(layerId)) {
-    await layerLoadPromises.get(layerId);
-    return;
+    return layerLoadPromises.get(layerId);
   }
 
   const item = row.item;
+  const generation = catalogGeneration;
+  const controller = new AbortController();
+  const isCurrent = () => (
+    generation === catalogGeneration
+    && !controller.signal.aborted
+    && layerRows.get(layerId) === row
+    && layerLoadControllers.get(layerId) === controller
+  );
   setRowState(layerId, "loading", "loading");
   setStatus(`Loading: ${layerDisplayName(item)}...`);
 
-  const loadPromise = fetchLayer(layerId)
+  const loadPromise = fetchLayer(layerId, controller.signal)
     .then((geojson) => {
+      if (!isCurrent()) return;
       const layer = makeGeoJsonLayer(layerId, layerDisplayName(item), geojson, item);
+      const previousLayer = activeLayers.get(layerId);
+      if (previousLayer) map.removeLayer(previousLayer);
       activeLayers.set(layerId, layer);
       if (row.checkbox.checked) {
         layer.addTo(map);
@@ -753,28 +799,65 @@ async function setLayerVisibility(layerId, visible) {
       return layer;
     })
     .catch((error) => {
+      if (!isCurrent() || error.name === "AbortError") return;
       row.checkbox.checked = false;
+      const previousLayer = activeLayers.get(layerId);
+      if (previousLayer) map.removeLayer(previousLayer);
       setRowState(layerId, "error", "failed");
       throw new Error(`${layerDisplayName(item)}: ${error.message}`);
     })
     .finally(() => {
-      layerLoadPromises.delete(layerId);
-      updateGroupCounts();
+      // A cancelled request must not clear a newer request for the same layer.
+      if (layerLoadPromises.get(layerId) === loadPromise) {
+        layerLoadPromises.delete(layerId);
+        layerLoadControllers.delete(layerId);
+        updateGroupCounts();
+      }
     });
 
+  layerLoadControllers.set(layerId, controller);
   layerLoadPromises.set(layerId, loadPromise);
-  await loadPromise;
+  return loadPromise;
+}
+
+async function loadVisibleLayers(layerIds, generation) {
+  let nextIndex = 0;
+  const errors = [];
+  async function loadNext() {
+    while (generation === catalogGeneration && nextIndex < layerIds.length) {
+      const layerId = layerIds[nextIndex++];
+      const row = layerRows.get(layerId);
+      if (!row?.checkbox.checked || row.missing) continue;
+      try {
+        await setLayerVisibility(layerId, true);
+      } catch (error) {
+        errors.push(error.message);
+      }
+    }
+  }
+  await Promise.all(Array.from(
+    { length: Math.min(MAX_CONCURRENT_LAYER_LOADS, layerIds.length) },
+    () => loadNext()
+  ));
+  return errors;
 }
 
 async function setLayerGroupVisibility(layerIds, visible) {
+  const action = ++visibilityActionGeneration;
+  const generation = catalogGeneration;
   for (const layerId of layerIds) {
-    try {
-      await setLayerVisibility(layerId, visible);
-    } catch (error) {
-      setStatus(`Loaded with issues: ${error.message}`);
-    }
+    if (generation !== catalogGeneration) return;
+    const row = layerRows.get(layerId);
+    if (row && !row.missing) row.checkbox.checked = visible;
+    if (!visible) await setLayerVisibility(layerId, false);
   }
+  const errors = visible ? await loadVisibleLayers(layerIds, generation) : [];
+  if (generation !== catalogGeneration || action !== visibilityActionGeneration) return;
   updateGroupCounts();
+  if (errors.length) {
+    setStatus(`Loaded with issues: ${errors.join(" | ")}`);
+    return;
+  }
   const noun = layerIds.length === 1 ? "layer" : "layers";
   setStatus(`${visible ? "Showing" : "Hidden"} ${layerIds.length} ${noun}.`);
 }
@@ -843,15 +926,21 @@ function appendLayerRow(parent, item, visibleLayerIds, firstLoad) {
   }
 
   checkbox.addEventListener("change", async () => {
+    const action = ++visibilityActionGeneration;
+    const generation = catalogGeneration;
     const visible = checkbox.checked;
     try {
       await setLayerVisibility(item.id, visible);
+      if (action !== visibilityActionGeneration || generation !== catalogGeneration
+          || layerRows.get(item.id)?.checkbox !== checkbox) return;
       if (visible && selectedCountry && isUnderseaCableItem(item)) {
         setStatus(selectedCountryCableStatus(refreshMapLayerStyles()));
       } else {
         setStatus(`${visible ? "Showing" : "Hidden"}: ${layerDisplayName(item)}.`);
       }
     } catch (error) {
+      if (action !== visibilityActionGeneration || generation !== catalogGeneration
+          || layerRows.get(item.id)?.checkbox !== checkbox) return;
       setStatus(`Loaded with issues: ${error.message}`);
     }
   });
@@ -984,66 +1073,76 @@ async function createMarker(payload) {
 }
 
 async function loadCatalogAndLayers() {
+  const requestGeneration = ++catalogRequestGeneration;
+  ++visibilityActionGeneration;
+  catalogLoadController?.abort();
+  const controller = new AbortController();
+  catalogLoadController = controller;
+  const isCurrent = () => (
+    requestGeneration === catalogRequestGeneration && !controller.signal.aborted
+  );
   setStatus("Loading layer catalog...");
-  selectedCountry = null;
-  const res = await fetch("/api/layers");
-  const catalog = await res.json();
+  try {
+    const res = await fetch("/api/layers", { signal: controller.signal });
+    const catalog = await res.json();
+    if (!isCurrent()) return;
+    if (!res.ok) throw new Error("Unable to load layer catalog.");
 
-  if (!res.ok) {
-    throw new Error("Unable to load layer catalog.");
-  }
-
-  currentCatalog = catalog;
-  const firstLoad = activeLayers.size === 0;
-  const visibleLayerIds = new Set();
-
-  for (const [id, lyr] of activeLayers.entries()) {
-    if (map.hasLayer(lyr)) {
-      visibleLayerIds.add(id);
+    const firstLoad = !hasLoadedCatalog;
+    // Checked rows include requested layers that have not finished loading yet.
+    const visibleLayerIds = new Set(
+      [...layerRows.entries()].filter(([, row]) => row.checkbox.checked).map(([id]) => id)
+    );
+    // Keep the current view usable if discovery fails. Only retire its requests
+    // once a replacement catalog has successfully arrived.
+    const generation = ++catalogGeneration;
+    cancelLayerLoads();
+    selectedCountry = null;
+    currentCatalog = catalog;
+    for (const layer of activeLayers.values()) {
+      map.removeLayer(layer);
     }
-  }
+    activeLayers.clear();
+    renderLayerPanel(catalog, visibleLayerIds, firstLoad);
+    hasLoadedCatalog = true;
 
-  for (const lyr of activeLayers.values()) {
-    try {
-      map.removeLayer(lyr);
-    } catch {}
-  }
-  activeLayers.clear();
-  layerLoadPromises.clear();
+    const loadErrors = await loadVisibleLayers(catalog.map((item) => item.id), generation);
+    if (!isCurrent()) return;
 
-  renderLayerPanel(catalog, visibleLayerIds, firstLoad);
-
-  let fitTargetBounds = null;
-  const loadErrors = [];
-
-  for (const item of catalog) {
-    const row = layerRows.get(item.id);
-    const shouldShow = item.available && row?.checkbox.checked;
-    if (!shouldShow) continue;
-
-    try {
-      await setLayerVisibility(item.id, true);
-      const lyr = activeLayers.get(item.id);
-      if (firstLoad && item.fit_on_load && lyr) {
-        try {
-          fitTargetBounds = lyr.getBounds();
-        } catch {}
+    if (firstLoad) {
+      let fitTargetBounds = null;
+      for (const item of catalog) {
+        const layer = activeLayers.get(item.id);
+        if (item.fit_on_load && layer && map.hasLayer(layer)) {
+          try {
+            fitTargetBounds = layer.getBounds();
+          } catch {}
+        }
       }
-    } catch (error) {
-      loadErrors.push(error.message);
+      if (fitTargetBounds) map.fitBounds(fitTargetBounds, { padding: [20, 20] });
     }
+    setStatus(loadErrors.length ? `Loaded with issues: ${loadErrors.join(" | ")}` : "Ready.");
+  } catch (error) {
+    if (!isCurrent() || error.name === "AbortError") return;
+    throw error;
+  } finally {
+    if (catalogLoadController === controller) catalogLoadController = null;
   }
+}
 
-  if (fitTargetBounds) {
-    map.fitBounds(fitTargetBounds, { padding: [20, 20] });
+async function refreshUserMarkers() {
+  const row = layerRows.get(USER_MARKERS_LAYER_ID);
+  if (!row || row.missing) return;
+  ++visibilityActionGeneration;
+  cancelLayerLoad(USER_MARKERS_LAYER_ID);
+  // Invalidate before requesting so hiding during refresh cannot reuse stale
+  // markers the next time the layer is shown.
+  const layer = activeLayers.get(USER_MARKERS_LAYER_ID);
+  if (layer) map.removeLayer(layer);
+  activeLayers.delete(USER_MARKERS_LAYER_ID);
+  if (row.checkbox.checked) {
+    await setLayerVisibility(USER_MARKERS_LAYER_ID, true);
   }
-
-  if (loadErrors.length) {
-    setStatus(`Loaded with issues: ${loadErrors.join(" | ")}`);
-    return;
-  }
-
-  setStatus("Ready.");
 }
 
 function clearMarkerForm() {
@@ -1098,9 +1197,14 @@ function bindMarkerControls() {
     try {
       setStatus("Saving marker...");
       const feature = await createMarker(payload);
-      await loadCatalogAndLayers();
       clearMarkerForm();
       const markerName = feature?.properties?.name || "Marker";
+      try {
+        await refreshUserMarkers();
+      } catch (error) {
+        setStatus(`Saved marker: ${markerName}. Unable to refresh markers: ${error.message}`);
+        return;
+      }
       setStatus(`Saved marker: ${markerName}.`);
     } catch (error) {
       setStatus(String(error));

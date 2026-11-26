@@ -187,6 +187,14 @@ All tracker statuses are retained. Use `--exclude-below-threshold` to omit the s
 python -m unittest discover -s tests -v
 ```
 
+Frontend regression tests use Node.js's built-in test runner, with no additional packages:
+
+```sh
+node --test tests/test_main.js
+```
+
+These exercise popup text handling, overlapping layer requests, and marker-only refreshes.
+
 ## AI Use
 
 OpenAI Codex has been used to assist in the creation of this project. Ideas, planning and structure are mine, but I've used it to assist in HTML and web elements I was not familiar with. All the maps, sources and research was developed by me. It also helped fix a rendering bug in the globe. 

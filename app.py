@@ -9,6 +9,7 @@ import re
 import zlib
 from datetime import datetime, timezone
 from pathlib import Path
+from threading import Lock
 from uuid import uuid4
 
 from flask import Flask, render_template, jsonify, abort, request, send_from_directory
@@ -89,6 +90,8 @@ LAYER_CATALOG = [
 ]
 
 app = Flask(__name__)
+_GEOJSON_SOURCE_INDEXES: dict[tuple[Path, Path], dict[str, Path]] = {}
+_GEOJSON_SOURCE_INDEX_LOCK = Lock()
 
 
 # ---------- shared helpers ----------
@@ -630,29 +633,44 @@ def build_geojson_for_gpkg(layer_id: str) -> dict:
 def discover_geojson_paths(root: Path) -> list[Path]:
     return discover_source_paths(root, {".geojson", ".json"})
 
-def discover_geojson_files(root: Path | None = None):
-    """
-    Returns list of overlay entries for *.geojson and *.json in a data folder,
-    including subfolders. The main map defaults to High-Resolution data only.
-    """
+def _geojson_source_index(root: Path, *, refresh: bool = False) -> dict[str, Path]:
+    """Publish complete path indexes; existing snapshots are never mutated."""
+    index_key = (DATA_DIR.resolve(), root.resolve())
+    with _GEOJSON_SOURCE_INDEX_LOCK:
+        if refresh or index_key not in _GEOJSON_SOURCE_INDEXES:
+            paths_by_id = {}
+            for path in discover_geojson_paths(root):
+                relative_path = path.relative_to(DATA_DIR).as_posix()
+                layer_id = f"geojson__{_key_for_name(relative_path)}"
+                paths_by_id.setdefault(layer_id, path)
+            _GEOJSON_SOURCE_INDEXES[index_key] = paths_by_id
+        return _GEOJSON_SOURCE_INDEXES[index_key]
+
+
+def geojson_layer_items(root: Path | None = None) -> list[tuple[dict, Path]]:
+    """Refresh discovery once and retain each layer's path with its metadata."""
     items = []
     root = root or map_data_dir()
 
-    for p in discover_geojson_paths(root):
+    for layer_id, p in _geojson_source_index(root, refresh=True).items():
         rel = p.relative_to(DATA_DIR).as_posix()
-        # Use relative-path key so files with same name in subfolders don't collide
-        key = _key_for_name(rel)
         title = rel.replace("/", " — ")
         metadata = layer_metadata_from_data_path(p)
-        items.append({
-            "id": f"geojson__{key}",
+        items.append(({
+            "id": layer_id,
             "title": f"{title} (GeoJSON)",
             "fit_on_load": False,
             "available": True,
             "default_visible": _default_layer_visibility(metadata),
             **metadata,
-        })
+        }, p))
     return items
+
+
+def discover_geojson_files(root: Path | None = None):
+    """Return fresh overlay entries, using High-Resolution data by default."""
+    return [item for item, _path in geojson_layer_items(root)]
+
 
 def resolve_geojson_from_id(layer_id: str, root: Path | None = None) -> Path:
     """
@@ -663,12 +681,16 @@ def resolve_geojson_from_id(layer_id: str, root: Path | None = None) -> Path:
     if len(parts) != 2 or parts[0] != "geojson":
         raise ValueError("Not a GeoJSON layer id")
 
-    wanted_key = parts[1]
     root = root or map_data_dir()
-    for p in discover_geojson_paths(root):
-        rel = p.relative_to(DATA_DIR).as_posix()
-        if _key_for_name(rel) == wanted_key:
-            return p
+    path = _geojson_source_index(root).get(layer_id)
+    if path is not None and is_readable_source_file(path):
+        return path
+
+    # A direct layer request may arrive before the next catalog reload. Refresh
+    # on misses/deletions so new sources work and removed sources are not served.
+    path = _geojson_source_index(root, refresh=True).get(layer_id)
+    if path is not None and is_readable_source_file(path):
+        return path
 
     raise ValueError(f"GeoJSON file not found for id: {layer_id}")
 
@@ -925,14 +947,9 @@ def flat_map_layer_items(include_cache_geojson: bool = True):
     for item in discover_shapefile_files():
         result.append({**item, "origin": "data"})
 
-    for item in discover_geojson_files():
-        try:
-            p = resolve_geojson_from_id(item["id"])
-            rel = p.relative_to(DATA_DIR).as_posix()
-            if rel in catalog_geojson_files:
-                continue
-        except Exception:
-            pass
+    for item, path in geojson_layer_items():
+        if path.relative_to(DATA_DIR).as_posix() in catalog_geojson_files:
+            continue
         result.append({**item, "origin": "data"})
 
     if include_cache_geojson:
@@ -974,13 +991,8 @@ def data_path_for_layer_item(item: dict) -> Path | None:
 
 def globe_country_layer_items():
     root = globe_country_data_dir()
-    for item in discover_geojson_files(root):
+    for item, path in geojson_layer_items(root):
         if not item.get("available"):
-            continue
-
-        try:
-            path = resolve_geojson_from_id(item["id"], root=root)
-        except Exception:
             continue
 
         if path and path_is_relative_to(path, root):

@@ -5,8 +5,10 @@ import json
 import os
 import tempfile
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from pathlib import Path
+from threading import Barrier
 from unittest.mock import patch
 
 import app
@@ -29,6 +31,7 @@ class DateMapperAppTests(unittest.TestCase):
             patch.object(app, "STORAGE_DIR", self.storage_dir),
             patch.object(app, "CACHE_DIR", self.cache_dir),
             patch.object(app, "MARKERS_FILE", self.markers_file),
+            patch.object(app, "_GEOJSON_SOURCE_INDEXES", {}),
         ]
         for active_patch in self.patches:
             active_patch.start()
@@ -441,6 +444,110 @@ class DateMapperAppTests(unittest.TestCase):
             [path.name for path in discovered],
             ["China_new_x3.geojson"],
         )
+
+    def test_catalog_scans_geojson_once_and_layer_reads_reuse_discovery(self):
+        source_dir = self.data_dir / app.MAP_DATA_SUBDIR / "Country"
+        source_dir.mkdir(parents=True)
+        for name in ("alpha", "beta", "gamma"):
+            (source_dir / f"{name}.geojson").write_text(
+                json.dumps({"type": "FeatureCollection", "features": []}),
+                encoding="utf-8",
+            )
+
+        with patch.object(app, "discover_geojson_paths", wraps=app.discover_geojson_paths) as discover:
+            layers = app.flat_map_layer_items(include_cache_geojson=False)
+            source_layers = [item for item in layers if item["id"].startswith("geojson__")]
+            self.assertEqual(len(source_layers), 3)
+            for item in source_layers:
+                response = self.client.get(f"/api/layer/{item['id']}")
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.get_json()["features"], [])
+
+        discover.assert_called_once_with(app.map_data_dir())
+
+    def test_catalog_reload_reflects_added_and_deleted_geojson_sources(self):
+        source_dir = self.data_dir / app.MAP_DATA_SUBDIR / "Country"
+        source_dir.mkdir(parents=True)
+        old_source = source_dir / "old.geojson"
+        old_source.write_text('{"type":"FeatureCollection","features":[]}', encoding="utf-8")
+        first_layers = self.client.get("/api/layers").get_json()
+        old_layer = next(item for item in first_layers if item["id"].startswith("geojson__"))
+
+        old_source.unlink()
+        new_source = source_dir / "new.geojson"
+        new_source.write_text('{"type":"FeatureCollection","features":[]}', encoding="utf-8")
+        second_layers = self.client.get("/api/layers").get_json()
+        source_layers = [item for item in second_layers if item["id"].startswith("geojson__")]
+
+        self.assertEqual(len(source_layers), 1)
+        self.assertNotEqual(source_layers[0]["id"], old_layer["id"])
+        self.assertEqual(app.resolve_geojson_from_id(source_layers[0]["id"]), new_source)
+
+    def test_direct_geojson_requests_refresh_for_added_and_deleted_sources(self):
+        source_dir = self.data_dir / app.MAP_DATA_SUBDIR / "Country"
+        source_dir.mkdir(parents=True)
+        self.assertEqual(app.discover_geojson_files(), [])
+        source = source_dir / "new.geojson"
+        source.write_text('{"type":"FeatureCollection","features":[]}', encoding="utf-8")
+        layer_id = f"geojson__{app._key_for_name(source.relative_to(self.data_dir).as_posix())}"
+
+        response = self.client.get(f"/api/layer/{layer_id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(app.cache_path(layer_id).exists())
+        source.unlink()
+
+        response = self.client.get(f"/api/layer/{layer_id}")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("GeoJSON file not found", response.get_json()["error"])
+
+    def test_catalog_does_not_duplicate_curated_geojson_sources(self):
+        source_dir = self.data_dir / app.MAP_DATA_SUBDIR / "Country"
+        source_dir.mkdir(parents=True)
+        source = source_dir / "shared.geojson"
+        source.write_text('{"type":"FeatureCollection","features":[]}', encoding="utf-8")
+        catalog = [{
+            "id": "curated_country",
+            "title": "Curated Country",
+            "source": {"type": "geojson", "file": source.relative_to(self.data_dir).as_posix()},
+        }]
+
+        with patch.object(app, "LAYER_CATALOG", catalog):
+            layers = app.flat_map_layer_items(include_cache_geojson=False)
+
+        self.assertEqual([item["id"] for item in layers], ["curated_country"])
+
+    def test_globe_country_catalog_scans_once_and_preserves_country_scope(self):
+        country_dir = self.data_dir / app.MAP_DATA_SUBDIR / "Country"
+        place_dir = self.data_dir / app.MAP_DATA_SUBDIR / "Place"
+        country_dir.mkdir(parents=True)
+        place_dir.mkdir(parents=True)
+        for source in (country_dir / "alpha.geojson", country_dir / "beta.geojson", place_dir / "city.geojson"):
+            source.write_text('{"type":"FeatureCollection","features":[]}', encoding="utf-8")
+
+        with patch.object(app, "discover_geojson_paths", wraps=app.discover_geojson_paths) as discover:
+            layers = list(app.globe_country_layer_items())
+
+        discover.assert_called_once_with(country_dir)
+        self.assertEqual({path.name for _item, path in layers}, {"alpha.geojson", "beta.geojson"})
+
+    def test_concurrent_layer_lookups_share_one_complete_source_index(self):
+        source_dir = self.data_dir / app.MAP_DATA_SUBDIR / "Country"
+        source_dir.mkdir(parents=True)
+        source = source_dir / "country.geojson"
+        source.write_text('{"type":"FeatureCollection","features":[]}', encoding="utf-8")
+        layer_id = f"geojson__{app._key_for_name(source.relative_to(self.data_dir).as_posix())}"
+        barrier = Barrier(4)
+
+        def lookup(_index):
+            barrier.wait(timeout=5)
+            return app.resolve_geojson_from_id(layer_id)
+
+        with patch.object(app, "discover_geojson_paths", wraps=app.discover_geojson_paths) as discover:
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                resolved_paths = list(executor.map(lookup, range(4)))
+
+        self.assertEqual(resolved_paths, [source] * 4)
+        discover.assert_called_once_with(app.map_data_dir())
 
     def test_nested_cache_geojson_is_auto_discovered(self):
         source_dir = self.cache_dir / "DATE_Test"
